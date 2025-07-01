@@ -7,6 +7,7 @@ defmodule DiscordAppWeb.Router do
 
   scope "/api", DiscordAppWeb do
     pipe_through :api
+    post("/auth/register", AuthController, :register)
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
