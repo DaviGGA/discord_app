@@ -7,7 +7,16 @@ defmodule DiscordAppWeb.FallbackController do
 
   use DiscordAppWeb, :controller
 
-  def call(conn, {:error, changeset}) do
+  def call(conn, {:error, :login_invalid}) do
+    conn
+    |> put_status(:unauthorized)
+    |> json(%{
+      name: "AuthenticationError",
+      error: "Invalid email password"
+    })
+  end
+
+  def call(conn, {:error, %Ecto.Changeset{} = changeset}) do
     conn
     |> put_status(:unprocessable_entity)
     |> json(%{
@@ -15,6 +24,17 @@ defmodule DiscordAppWeb.FallbackController do
       error: translate_errors(changeset)
     })
   end
+
+  def call(conn, {:error, reason}) do
+    conn
+    |> put_status(400)
+    |> json(%{
+      name: "BadRequestError",
+      error: reason
+    })
+  end
+
+
 
   defp translate_errors(changeset) do
     Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->

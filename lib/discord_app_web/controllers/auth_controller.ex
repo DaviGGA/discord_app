@@ -15,4 +15,15 @@ defmodule DiscordAppWeb.AuthController do
       })
     end
   end
+
+  def login(conn, _params) do
+    with {:ok, token, _} <- AuthContext.login(conn.body_params) do
+      conn
+      |> put_status(200)
+      |> json(%{
+        message: "TODO",
+        data: token
+      })
+    end
+  end
 end
