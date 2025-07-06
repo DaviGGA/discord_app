@@ -1,3 +1,5 @@
+require Logger
+
 defmodule DiscordAppWeb.AuthController do
   use DiscordAppWeb, :controller
   alias DiscordApp.Auth.AuthContext
@@ -23,6 +25,18 @@ defmodule DiscordAppWeb.AuthController do
       |> json(%{
         message: "TODO",
         data: token
+      })
+    end
+  end
+
+  def me(conn, _params) do
+    user_id = conn.assigns[:user_id]
+    with %User{} = user <- AuthContext.me(user_id) do
+      conn
+      |> put_status(200)
+      |> json(%{
+        message: "Logged user successfuly loaded",
+        data: user
       })
     end
   end

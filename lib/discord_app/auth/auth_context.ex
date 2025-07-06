@@ -13,27 +13,19 @@ defmodule DiscordApp.Auth.AuthContext do
   end
 
   def login(params) do
-    Repo.get_by(User, email: params["email"])
-    |> found_user_by_email
-    |> password_valid(params["password"])
-    |> sign_token
-  end
-
-  defp found_user_by_email(%User{} = user), do: user
-  defp found_user_by_email(nil), do: {:error, :login_invalid}
-
-  defp password_valid(%User{} =  user, params_password) do
-    password_valid? = PasswordContext.verify_password(user, params_password)
-    case password_valid? do
-      true -> user
-      false -> {:error, :login_invalid}
+    with {:ok, user} <- get_user_by_email(params["email"]),
+    {:ok, _} <- PasswordContext.verify_password(user, params["password"]) do
+      TokenContext.generate_and_sign(%{"user_id" => user.id})
     end
   end
-  defp password_valid({:error, reason}, _), do:  {:error, reason}
 
-  defp sign_token(%User{} = user), do:
-    TokenContext.generate_and_sign(%{"id" => user.id})
+  defp get_user_by_email(email) do
+    case Repo.get_by(User, email: email) do
+      %User{} = user -> {:ok, user}
+      nil -> {:error, "Invalid email or password"}
+    end
+  end
 
-  defp sign_token({:error, reason}), do: {:error, reason}
+  def me(user_id), do: Repo.get(User, user_id)
 
 end

@@ -13,7 +13,11 @@ defmodule DiscordApp.Auth.PasswordContext do
     end
   end
 
-  def verify_password(user, password), do:
-    Bcrypt.verify_pass(password, user.password)
+  def verify_password(user, password) do
+    case Bcrypt.verify_pass(password, user.password) do
+      true -> {:ok, nil}
+      false -> {:error, "Invalid email or password"}
+    end
+  end
 
 end
